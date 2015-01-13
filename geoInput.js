@@ -14,7 +14,7 @@
 
 		GI = this;
 		
-		this.GMapsAPI = '<API_KEY>';
+		this.GMapsAPI = '<YOUR_API_KEY>'; // only required for reverse geocoding.
 	  
 		this.map;
 		this.mapOptions;
@@ -159,9 +159,11 @@
 	  		
 	  		/**
 	  		 * appends hidden input to parent div, uses first type element as name, value with short name
-	  		 */ 
+	  		 */
+	  		this.hiddenInputsContainer = $('<div/>',{ id : 'dmgig_hidden' }).appendTo(this); 
+	  		 
 	  		this.revGeocodeResultsAddHiddenInputs = function(short_name,types){
-	  			return $('<input/>',{ type : "hidden", name : types[0], value : short_name });
+	  			$('<input/>',{ type : "hidden", name : types[0], value : short_name }).appendTo( GI.hiddenInputsContainer );
 	  		}	  		
 	  		
 	  		// rev geocode result set actions
@@ -191,6 +193,7 @@
 		 */		
 		this.watchMarkerMove = google.maps.event.addListener(GI.marker, 'dragend', function() {
 			GI.setLatLngInputs();
+			GI.hiddenInputsContainer.empty(); // clear out the rev geocode inputs, just in case they exist
 		});
 
 		/**
@@ -201,6 +204,9 @@
 			var search_input = GI.search_input.val();
 			var uriEncodedLocation = encodeURIComponent(search_input);
 			$.get('https://maps.googleapis.com/maps/api/geocode/json?address='+uriEncodedLocation,function(data){
+				
+				console.log(data);
+				
 				var center_to = new google.maps.LatLng( data.results[0].geometry.location.lat, data.results[0].geometry.location.lng );
 				GI.map.setCenter(center_to);
 				GI.markerToCenter();
@@ -217,14 +223,18 @@
 			var s_latLng = latLng.lat().toString()+','+latLng.lng().toString();
 			var uriEncodedLatLng = encodeURIComponent(s_latLng);
 			$.get('https://maps.googleapis.com/maps/api/geocode/json?latlng='+uriEncodedLatLng+'&location_type=ROOFTOP&result_type=street_address&key='+GI.GMapsAPI,function(data){
+				
+				console.log(data);
+				
 				GI.revGeocodeResultsTbody.empty();
+				GI.hiddenInputsContainer.empty();
 				GI.revGeocodeResults.show();
 				GI.revGeocodeResultSetsFound.html(data.results.length);
 				if( data.results.length === 0 ) return;
 				var components = data.results[0].address_components;
 				for(i in components){
 					$(GI.revGeocodeResultsMakeRow(components[i].long_name,components[i].types)).appendTo(GI.revGeocodeResultsTable);
-					$(GI.revGeocodeResultsAddHiddenInputs(components[i].short_name,components[i].types)).appendTo(GI);
+					$(GI.revGeocodeResultsAddHiddenInputs(components[i].short_name,components[i].types));
 				}
 			})
 			.fail( function(){ alert('Failed to reverse geocode '+s_latLng) } );
