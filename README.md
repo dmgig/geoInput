@@ -6,3 +6,5 @@ A "geolocation" type input for html forms. Provides Google Map and marker. Adds 
 User to provide location as text input. This will be geocoded and marker placed at user specified point. Alternately, the user may drag the marker to the desired location, and then reverse geocode based on marker position.
 
 Creates hidden inputs for lat and lng at all times based on marker position. If reverse geocoding has occurred, creates hidden inputs for each returned address_component.
+
+![alt tag](http://dmgig.com/geoInput.png)
