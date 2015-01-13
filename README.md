@@ -7,4 +7,4 @@ User to provide location as text input. This will be geocoded and marker placed 
 
 Creates hidden inputs for lat and lng at all times based on marker position. If reverse geocoding has occurred, creates hidden inputs for each returned address_component.
 
-![alt tag](http://dmgig.com/geoInput.png)
+![alt tag](http://dmgig.com/geoInput/geoInput.png)
