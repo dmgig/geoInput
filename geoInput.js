@@ -1,4 +1,4 @@
-/**
+ /**
  * geoInput
  * 
  * add location details to html forms. lat, lng, text. 
@@ -8,9 +8,11 @@
  * @author   Dave M. Giglio <dave.m.giglio@gmail.com>
  */
 
-(function ( $ ) {
+(function ($) {
 
-	$.fn.geoInput = function( options ) {
+    'use strict';
+
+    $.fn.geoInput = function (options) {
 
 		GI = this;
 
