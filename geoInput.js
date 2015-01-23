@@ -139,8 +139,8 @@
 		t.clearPreferences   = $('<div/>', { title : 'clear data storage' });						
 		// inputs, and input containers
 		t.geoCodeInput       = $('<input/>', {});
-		t.latInput           = $('<input/>', { type : 'hidden' });
-		t.lngInput           = $('<input/>', { type : 'hidden' });
+		t.latInput           = $('<input/>', { type : 'hidden', name : 'lat' });
+		t.lngInput           = $('<input/>', { type : 'hidden', name : 'lng' });
 		t.hiddenInputs       = $('<div/>', {}); // div to contain hidden inputs from geocoding results
 		// other elements
 		t.spacer             = $('<div/>', {}); // layout spacer
