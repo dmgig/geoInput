@@ -8,28 +8,31 @@
  * @author   Dave M. Giglio <dave.m.giglio@gmail.com>
  */
 
+/*global google: true jQuery: true*/
 /*jslint browser: true, todo: true, devel: true */
-
 /*properties
     LatLng, Map, Marker, addListener, address_components, after, apikey, append,
-    appendTo, bgColor, bgcolor, center, centerOnMarker, centerToMarker,
+    appendTo, bgColor, bgcolor, center, centerOnMarker, centerToMarker, clear,
     clearPreferences, click, closest, color, css, data, dmgig_mapCenter,
-    dmgig_zoomLevel, empty, event, extend, fail, find, fn, geoCode, geoCodeInput,
-    geoInput, geocodeTextLocation, geometry, get, getCenter, getItem,
-    getPosition, getStoredMapCenter, getStoredZoom, getZoom, height,
-    hiddenInputs, hide, hover, html, initialize, join, lat, latInput,
-    latLngDisplay, latLngGoogleToString, latLngStringToGoogle, length, lng,
-    lngInput, location, log, long_name, main, map, mapCenter, mapOptions, maps,
-    marker, markerToCenter, name, on, parent_form, precision, prefs, prefsPanel,
-    prepend, prop, push, removeItem, results, revGeoCode, revGeoCodeFoundCount,
-    revGeoCodeResultsBody, revGeoCodeResultsHide,
+    dmgig_zoomLevel, empty, event, extend, fail, fn, geoCode, geoCodeInput,
+    geoControls, geoInput, geocodeTextLocation, geometry, get, getCenter,
+    getElementById, getItem, getMapId, getPosition, getStoredMapCenter,
+    getStoredZoom, getZoom, height, hiddenInputs, hide, hover, html, id,
+    initialize, join, lat, latInput, latLngDisplay, latLngGoogleToString,
+    latLngStringToGoogle, length, lng, lngInput, location, log, long_name, main,
+    map, mapCenter, mapControls, mapOptions, mapid, maps, marker, markerToCenter,
+    name, on, parent_form, precision, prefs, prefsPanel, prepend, prop,
+    rGeoControls, rGeoResults, random, removeItem, results, revGeoCode,
+    revGeoCodeFoundCount, revGeoCodeResultsBody, revGeoCodeResultsHide,
     revGeocodeResultsAddHiddenInputs, revGeocodeResultsMakeRow,
-    reverseGeocodeMarkerPosition, setCenter, setDraggable, setLatLngInputs,
-    setMap, setPosition, short_name, show, slideToggle, spacer, split,
-    storeMapCenter, storeMarkerCount, storeZoomLevel, title, toFixed, toString,
+    reverseGeocodeMarkerPosition, rgcHead, rgcTable, rgcTh1, rgcTh2, rgcTr,
+    rgctHead, setCenter, setDraggable, setLatLngInputs, setMap, setPosition,
+    short_name, show, slideToggle, spacer, split, storeMapCenter,
+    storeMarkerCount, storeZoomLevel, substring, title, toFixed, toString,
     togglePrefs, type, types, val, value, watchMarkerMove, width, zoom,
     zoomLevel
 */
+
 
 (function ($) {
 
@@ -60,6 +63,14 @@
          * HELPERS
          */
         helper = {
+
+            /**
+             * google maps requires a distinct id, so if someone wants more than one on a page, we'll need to generate random id
+             */
+            getMapId : function () {
+                return 'dmgig_' + (Math.random() + 1).toString(36).substring(2, 7);
+            },
+
             /**
              * latLng string to to google obj. '0,0'
              */
@@ -121,25 +132,19 @@
          * layout html */
         t = {};
         // main template
-        t.main = [];
-        t.main.push('<div id="dmgig_main">');
-        t.main.push('    <div id="dmgig_map"></div>');
-        t.main.push('    <div id="dmgig_mapInfoAndControls"></div>');
-        t.main.push('    <div id="dmgig_geoCodingControls">');
-        t.main.push('        <div style="clear:both"></div>');
-        t.main.push('    </div>');
-        t.main.push('    <div id="dmgig_revGeoCodeResults">');
-        t.main.push('        <table>');
-        t.main.push('            <thead>');
-        t.main.push('                <tr>');
-        t.main.push('                    <th id="dmgig_revGeoCodeResultsTh">&nbsp;&nbsp;&nbsp;Result Sets Found:</th>');
-        t.main.push('                    <th></th>');
-        t.main.push('                </tr>');
-        t.main.push('            </thead>');
-        t.main.push('        </table>');
-        t.main.push('    </div>');
-        t.main.push('</div>');
-        t.main = $(t.main.join("\n"));
+        t.mapid = helper.getMapId();
+
+        t.main         = $('<div/>');
+        t.map          = $('    <div/>', { id : t.mapid }).appendTo(t.main);
+        t.mapControls  = $('       <div/>').appendTo(t.main);
+        t.geoControls  = $('       <div/>').appendTo(t.main);
+        t.clear        = $('           <div style="clear:both"></div>').appendTo(t.geoControls);
+        t.rGeoResults  = $('       <div/>').appendTo(t.main);
+        t.rgcTable     = $('           <table>').appendTo(t.rGeoControls);
+        t.rgctHead     = $('               <thead>').appendTo(t.rgcTable);
+        t.rgcTr        = $('                   <tr>').appendTo(t.rgcHead);
+        t.rgcTh1       = $('                       <th>&nbsp;&nbsp;&nbsp;Result Sets Found:</th>').appendTo(t.rgcTr);
+        t.rgcTh2       = $('                       <th></th>').appendTo(t.rgcTr);
         this.append(t.main); // append main template
 
         /**
@@ -171,18 +176,18 @@
 
         /**
          * ATTACH interactive elements */
-        $("#dmgig_mapInfoAndControls").append(t.latLngDisplay);
+        $(t.mapControls).append(t.latLngDisplay);
 
-        $("#dmgig_geoCodingControls").prepend(t.geoCode, t.geoCodeInput, t.revGeoCode, t.togglePrefs, t.spacer, t.markerToCenter, t.centerOnMarker);
+        $(t.geoControls).prepend(t.geoCode, t.geoCodeInput, t.revGeoCode, t.togglePrefs, t.spacer, t.markerToCenter, t.centerOnMarker);
 
-        $("#dmgig_revGeoCodeResultsTh").prepend(t.revGeoCodeResultsHide);
-        $("#dmgig_revGeoCodeResultsTh").append(t.revGeoCodeFoundCount);
+        $(t.rgcTh1).prepend(t.revGeoCodeResultsHide);
+        $(t.rgcTh1).append(t.revGeoCodeFoundCount);
 
-        $("#dmgig_revGeoCodeResults").append(t.revGeoCodeResultsBody);
-        $("#dmgig_revGeoCodeResults").after(t.latInput, t.lngInput, t.hiddenInputs);
+        $(t.rGeoResults).append(t.revGeoCodeResultsBody);
+        $(t.rGeoResults).after(t.latInput, t.lngInput, t.hiddenInputs);
 
         t.prefsPanel.append(t.storeZoomLevel, t.storeMapCenter, t.clearPreferences); // todo: t.storeMarkerCount
-        $("#dmgig_main").find("#dmgig_geoCodingControls").after(t.prefsPanel);
+        $(t.geoControls).after(t.prefsPanel);
 
         /**
          * CSS */
@@ -237,28 +242,28 @@
             return selector;
         }
 
-        $("#dmgig_main").css('width', settings.width)
-                        .css('position', 'relative')
-                        .css('border', '1px solid #AAA');
+        t.main.css('width', settings.width)
+              .css('position', 'relative')
+              .css('border', '1px solid #AAA');
 
-        $("#dmgig_map").css('width', settings.width)
-                       .css('height', settings.height)
-                       .css('border', '1px solid #CCC')
-                       .css('background-color', settings.bgColor)
-                       .css('text-align', 'center')
-                       .html('<br /><br />loading...');
+        t.map.css('width', settings.width)
+             .css('height', settings.height)
+             .css('border', '1px solid #CCC')
+             .css('background-color', settings.bgColor)
+             .css('text-align', 'center')
+             .html('<br /><br />loading...');
 
-        $("#dmgig_revGeoCodeResults").css('clear', 'both')
-                                     .css('display', 'none')
-                                     .css('left', '-1px')
-                                     .css('width', 'calc(' + settings.width + ' - 8px)')
-                                     .css('background-color', '#FFF')
-                                     .css('border', '2px solid #CCC')
-                                     .css('position', 'absolute')
-                                     .css('z-index', '5555')
-                                     .css('font-size', '12px')
-                                     .css('font-family', 'Arial')
-                                     .css('padding', '3px');
+        t.rGeoResults.css('clear', 'both')
+                     .css('display', 'none')
+                     .css('left', '-1px')
+                     .css('width', 'calc(' + settings.width + ' - 8px)')
+                     .css('background-color', '#FFF')
+                     .css('border', '2px solid #CCC')
+                     .css('position', 'absolute')
+                     .css('z-index', '5555')
+                     .css('font-size', '12px')
+                     .css('font-family', 'Arial')
+                     .css('padding', '3px');
 
         t.prefsPanel.css('clear', 'both')
                     .css('display', 'none')
@@ -318,7 +323,7 @@
         t.clearPreferences.on('click', function () { GI.prefs.clearPreferences(); });
 
         // rev geocode result set actions
-        t.revGeoCodeResultsHide.on('click', function () { $("#dmgig_revGeoCodeResults").hide(); });
+        t.revGeoCodeResultsHide.on('click', function () { t.rGeoResults.hide(); });
 
         t.togglePrefs.click(function () {
             var clicks = $(this).data('clicks');
@@ -339,7 +344,7 @@
                 center : settings.mapCenter
             };
 
-            GI.map = new google.maps.Map(dmgig_map, GI.mapOptions);
+            GI.map = new google.maps.Map(document.getElementById(t.mapid), GI.mapOptions);
 
             GI.marker.setPosition(settings.mapCenter);
             GI.marker.setMap(GI.map);
@@ -426,7 +431,7 @@
                 t.hiddenInputs.empty();
                 t.revGeoCodeResultsBody.empty();
                 t.revGeoCodeFoundCount.html(data.results.length);
-                $('#dmgig_revGeoCodeResults').show();
+                t.rGeoResults.show();
                 if (data.results.length === 0) { return; }
 
                 components = data.results[0].address_components;
