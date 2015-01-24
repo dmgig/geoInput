@@ -36,25 +36,27 @@ SOFTWARE.
 /*jslint browser: true, todo: true, devel: true */
 /*properties
     LatLng, Map, Marker, addListener, address_components, after, apikey, append,
-    appendTo, bgColor, bgcolor, center, centerOnMarker, centerToMarker, clear,
-    clearPreferences, click, closest, color, css, data, dmgig_mapCenter,
-    dmgig_zoomLevel, empty, event, extend, fail, fn, geoCode, geoCodeInput,
-    geoControls, geoInput, geocodeTextLocation, geometry, get, getCenter,
-    getElementById, getItem, getMapId, getPosition, getStoredMapCenter,
-    getStoredZoom, getZoom, height, hiddenInputs, hide, hover, html, id,
-    initialize, join, lat, latInput, latLngDisplay, latLngGoogleToString,
-    latLngStringToGoogle, length, lng, lngInput, location, log, long_name, main,
-    map, mapCenter, mapControls, mapOptions, mapid, maps, marker, markerToCenter,
-    name, on, parent_form, precision, prefs, prefsPanel, prepend, prop,
+    appendTo, 'background-color', bgColor, bgColorMap, bgcolor, border,
+    'border-radius', center, centerOnMarker, centerToMarker, clear,
+    clearPreferences, click, closest, color, css, cursor, data, display,
+    dmgig_mapCenter, dmgig_zoomLevel, empty, event, extend, fail, float, fn,
+    'font-family', 'font-size', geoCode, geoCodeInput, geoControls, geoInput,
+    geocodeTextLocation, geometry, get, getCenter, getElementById, getItem,
+    getMapId, getPosition, getStoredMapCenter, getStoredZoom, getZoom, height,
+    hiddenInputs, hide, hover, html, id, initialize, join, lat, latInput,
+    latLngDisplay, latLngGoogleToString, latLngStringToGoogle, left, length, lng,
+    lngInput, location, log, long_name, map, mapCenter, mapControls, mapOptions,
+    mapid, maps, margin, 'margin-bottom', marker, markerToCenter, name, on,
+    padding, parent_form, position, precision, prefs, prefsPanel, prepend, prop,
     rGeoControls, rGeoResults, random, removeItem, results, revGeoCode,
     revGeoCodeFoundCount, revGeoCodeResultsBody, revGeoCodeResultsHide,
     revGeocodeResultsAddHiddenInputs, revGeocodeResultsMakeRow,
     reverseGeocodeMarkerPosition, rgcHead, rgcTable, rgcTh1, rgcTh2, rgcTr,
     rgctHead, setCenter, setDraggable, setLatLngInputs, setMap, setPosition,
     short_name, show, slideToggle, spacer, split, storeMapCenter,
-    storeMarkerCount, storeZoomLevel, substring, title, toFixed, toString,
-    togglePrefs, type, types, val, value, watchMarkerMove, width, zoom,
-    zoomLevel
+    storeMarkerCount, storeZoomLevel, substring, 'text-align', title, toFixed,
+    toString, togglePrefs, txtColor, type, types, val, value, watchMarkerMove,
+    width, 'z-index', zoom, zoomLevel
 */
 
 
@@ -73,14 +75,15 @@ SOFTWARE.
         GI.marker     = new google.maps.Marker();
 
         settings = $.extend({
-            apikey : "<APIKEY>",
-            width : "300px",
-            height : "150px",
-            bgColor : "#A3C3FF",
-            precision : 6,
-            zoomLevel : 2,
-            zoom: '',
-            mapCenter : '0,0'
+            apikey     : "<APIKEY>",
+            width      : "300px",
+            height     : "150px",
+            bgColorMap : "#A3C3FF",
+            bgColor    : '#DDD',
+            txtColor   : '#000',
+            precision  : 6,
+            zoomLevel  : 2,
+            mapCenter  : '0,0'
         }, options);
 
         /** 
@@ -158,26 +161,26 @@ SOFTWARE.
         // main template
         t.mapid = helper.getMapId();
 
-        t.main         = $('<div/>');
-        t.map          = $('    <div/>', { id : t.mapid }).appendTo(t.main);
-        t.mapControls  = $('       <div/>').appendTo(t.main);
-        t.geoControls  = $('       <div/>').appendTo(t.main);
-        t.clear        = $('           <div style="clear:both"></div>').appendTo(t.geoControls);
-        t.rGeoResults  = $('       <div/>').appendTo(t.main);
-        t.rgcTable     = $('           <table>').appendTo(t.rGeoControls);
-        t.rgctHead     = $('               <thead>').appendTo(t.rgcTable);
-        t.rgcTr        = $('                   <tr>').appendTo(t.rgcHead);
-        t.rgcTh1       = $('                       <th>&nbsp;&nbsp;&nbsp;Result Sets Found:</th>').appendTo(t.rgcTr);
-        t.rgcTh2       = $('                       <th></th>').appendTo(t.rgcTr);
-        this.append(t.main); // append main template
+        t.geoInput     = $('<div/>', { id : 'dmgig_geoInput' });
+        t.map          = $('    <div/>', { id : t.mapid }).appendTo(t.geoInput);
+        t.mapControls  = $('    <div/>').appendTo(t.geoInput);
+        t.geoControls  = $('    <div/>').appendTo(t.geoInput);
+        t.clear        = $('        <div style="clear:both"></div>').appendTo(t.geoControls);
+        t.rGeoResults  = $('    <div/>').appendTo(t.geoInput);
+        t.rgcTable     = $('        <table>').appendTo(t.rGeoControls);
+        t.rgctHead     = $('            <thead>').appendTo(t.rgcTable);
+        t.rgcTr        = $('                <tr>').appendTo(t.rgcHead);
+        t.rgcTh1       = $('                    <th>&nbsp;&nbsp;&nbsp;Result Sets Found:</th>').appendTo(t.rgcTr);
+        t.rgcTh2       = $('                    <th></th>').appendTo(t.rgcTr);
+        this.append(t.geoInput); // append main template
 
         /**
          * CREATE interactive and other elements */
         // display
-        t.latLngDisplay         = $('<div/>', {});
-        t.revGeoCodeResultsBody = $('<tbody>', {});
-        t.revGeoCodeFoundCount  = $('<span/>', {});
-        t.prefsPanel            = $('<div/>', {});
+        t.latLngDisplay         = $('<div/>');
+        t.revGeoCodeResultsBody = $('<tbody>');
+        t.revGeoCodeFoundCount  = $('<span/>');
+        t.prefsPanel            = $('<div/>');
         // buttons
         t.geoCode               = $('<div/>', { title : 'geocode from text' });
         t.revGeoCode            = $('<div/>', { title : 'reverse geocode marker location' });
@@ -185,24 +188,25 @@ SOFTWARE.
         t.centerOnMarker        = $('<div/>', { title : 'center map on marker(s)' });
         t.revGeoCodeResultsHide = $('<span/>', { title : 'hide results' });
         // prefs buttons
-        t.togglePrefs        = $('<div/>', { title : 'toggle preferences' });
-        t.storeZoomLevel     = $('<div/>', { title : 'store zoom level' });
-        t.storeMapCenter     = $('<div/>', { title : 'store map center' });
-        t.storeMarkerCount   = $('<div/>', { title : 'store marker count' });
-        t.clearPreferences   = $('<div/>', { title : 'clear data storage' });
+        t.togglePrefs           = $('<div/>', { title : 'toggle preferences' });
+        t.storeZoomLevel        = $('<div/>', { title : 'store zoom level' });
+        t.storeMapCenter        = $('<div/>', { title : 'store map center' });
+        t.storeMarkerCount      = $('<div/>', { title : 'store marker count' });
+        t.clearPreferences      = $('<div/>', { title : 'clear data storage' });
         // inputs, and input containers
-        t.geoCodeInput       = $('<input/>', {});
-        t.latInput           = $('<input/>', { type : 'hidden', name : 'lat' });
-        t.lngInput           = $('<input/>', { type : 'hidden', name : 'lng' });
-        t.hiddenInputs       = $('<div/>', {}); // div to contain hidden inputs from geocoding results
+        t.geoCodeInput          = $('<input/>');
+        t.latInput              = $('<input/>', { type : 'hidden', name : 'lat' });
+        t.lngInput              = $('<input/>', { type : 'hidden', name : 'lng' });
+        t.hiddenInputs          = $('<div/>'); // div to contain hidden inputs from geocoding results
         // other elements
-        t.spacer             = $('<div/>', {}); // layout spacer
+        t.spacerRight           = $('<div/>'); // layout spacers
+        t.spacerLeft            = $('<div/>');
 
         /**
          * ATTACH interactive elements */
         $(t.mapControls).append(t.latLngDisplay);
 
-        $(t.geoControls).prepend(t.geoCode, t.geoCodeInput, t.revGeoCode, t.togglePrefs, t.spacer, t.markerToCenter, t.centerOnMarker);
+        $(t.geoControls).prepend(t.geoCode, t.geoCodeInput, t.spacerLeft, t.revGeoCode, t.togglePrefs, t.spacerRight, t.markerToCenter, t.centerOnMarker);
 
         $(t.rgcTh1).prepend(t.revGeoCodeResultsHide);
         $(t.rgcTh1).append(t.revGeoCodeFoundCount);
@@ -215,101 +219,132 @@ SOFTWARE.
 
         /**
          * CSS */
-        t.color = '#000';
-        t.bgcolor = '#DDD';
-
         function button(selector, content, float) {
-            selector.css('float', float)
-                    .css('height', '12px')
-                    .css('width', '12px')
-                    .css('padding', '1px')
-                    .css('margin', '1px')
-                    .css('border', '1px solid #999')
-                    .css('border-radius', '4px')
-                    .css('color', t.color)
-                    .css('background-color', t.bgcolor)
-                    .css('text-align', 'center')
-                    .css('font-size', '12px')
-                    .css('font-family', 'console')
-                    .css('cursor', 'pointer')
-                    .html(content);
+            selector.css({
+                'float'             : float,
+                'height'            : '12px',
+                'min-width'         : '12px',
+                'padding'           : '1px',
+                'margin'            : '1px',
+                'border'            : '1px solid #999',
+                'border-radius'     : '4px',
+                'color'             : settings.color,
+                'background-color'  : settings.bgcolor,
+                'text-align'        : 'center',
+                'font-size'         : '12px',
+                'font-family'       : 'console',
+                'cursor'            : 'pointer'
+            });
+            selector.html(content);
             selector.hover(function () {
-                $(this).css('color', t.bgcolor)
-                       .css('background-color', t.color);
+                $(this).css({
+                    'color' : settings.bgcolor,
+                    'background-color' : settings.color
+                });
             }, function () {
-                $(this).css('color', t.color)
-                       .css('background-color', t.bgcolor);
+                $(this).css({
+                    'color' : settings.color,
+                    'background-color' : settings.bgColor
+                });
             });
             return selector;
         }
 
         function prefsButton(selector, content) {
-            selector.css('height', '12px')
-                    .css('padding', '1px')
-                    .css('margin', '1px')
-                    .css('border', '1px solid #999')
-                    .css('border-radius', '4px')
-                    .css('color', t.color)
-                    .css('background-color', t.bgcolor)
-                    .css('text-align', 'center')
-                    .css('font-size', '12px')
-                    .css('font-family', 'console')
-                    .css('cursor', 'pointer')
-                    .html(content);
+            selector.css({
+                'height'            : '12px',
+                'padding'           : '1px',
+                'margin'            : '1px',
+                'border'            : '1px solid #999',
+                'border-radius'     : '4px',
+                'color'             : settings.color,
+                'background-color'  : settings.bgcolor,
+                'font-size'         : '12px',
+                'font-family'       : 'console',
+                'cursor'            : 'pointer'
+            });
+            selector.html(content);
             selector.hover(function () {
-                $(this).css('color', t.bgcolor)
-                       .css('background-color', t.color);
+                $(this).css({
+                    'color' : settings.bgcolor,
+                    'background-color' : settings.color
+                });
             }, function () {
-                $(this).css('color', t.color)
-                       .css('background-color', t.bgcolor);
+                $(this).css({
+                    'color' : settings.color,
+                    'background-color' : settings.bgColor
+                });
             });
             return selector;
         }
 
-        t.main.css('width', settings.width)
-              .css('position', 'relative')
-              .css('border', '1px solid #AAA');
+        function spacer(selector, float) {
+            selector.css({
+                'width'   : '12px',
+                'height'  : '12px',
+                'padding' : '1px',
+                'margin'  : '1px',
+                'float'   : float
+            });
+            return selector;
+        }
 
-        t.map.css('width', settings.width)
-             .css('height', settings.height)
-             .css('border', '1px solid #CCC')
-             .css('background-color', settings.bgColor)
-             .css('text-align', 'center')
-             .html('<br /><br />loading...');
 
-        t.rGeoResults.css('clear', 'both')
-                     .css('display', 'none')
-                     .css('left', '-1px')
-                     .css('width', 'calc(' + settings.width + ' - 8px)')
-                     .css('background-color', '#FFF')
-                     .css('border', '2px solid #CCC')
-                     .css('position', 'absolute')
-                     .css('z-index', '5555')
-                     .css('font-size', '12px')
-                     .css('font-family', 'Arial')
-                     .css('padding', '3px');
+        t.geoInput.css({
+            'width'    : settings.width,
+            'position' : 'relative',
+            'border'   : '1px solid #AAA'
+        });
 
-        t.prefsPanel.css('clear', 'both')
-                    .css('display', 'none')
-                    .css('left', '-1px')
-                    .css('width', 'calc(' + settings.width + ' - 2px)')
-                    .css('background-color', '#DDD')
-                    .css('border', '2px solid #CCC')
-                    .css('position', 'absolute')
-                    .css('z-index', '9999');
+        t.map.css({
+            'width'            : settings.width,
+            'height'           : settings.height,
+            'border'           : '1px solid #CCC',
+            'background-color' : settings.bgColor,
+            'text-align'       : 'center'
+        });
+        t.map.html('<br /><br />loading...');
 
-        t.latLngDisplay.css('font-size', '12px')
-                       .css('text-align', 'center')
-                       .css('background-color', t.color)
-                       .css('color', t.bgcolor)
-                       .css('margin-bottom', '2px')
-                       .html('0,0');
+        t.rGeoResults.css({
+            'clear'            : 'both',
+            'display'          : 'none',
+            'left'             : '-1px',
+            'width'            : 'calc(' + settings.width + ' - 8px,',
+            'background-color' : '#FFF',
+            'border'           : '2px solid #CCC',
+            'position'         : 'absolute',
+            'z-index'          : '5555',
+            'font-size'        : '12px',
+            'font-family'      : 'Arial',
+            'padding'          : '3px'
+        });
+
+        t.prefsPanel.css({
+            'clear'             : 'both',
+            'display'           : 'none',
+            'left'              : '-1px',
+            'width'             : 'calc(' + settings.width + ' - 2px,',
+            'background-color'  : '#DDD',
+            'border'            : '2px solid #CCC',
+            'position'          : 'absolute',
+            'z-index'           : '9999'
+        });
+
+        t.latLngDisplay.css({
+            'font-size'        : '12px',
+            'text-align'       : 'center',
+            'background-color' : '#666',
+            'color'            : '#FFF',
+            'margin-bottom'    : '2px'
+        });
+        t.latLngDisplay.html('0,0');
 
         button(t.geoCode, '&#9992;', 'left');
-        button(t.revGeoCode, '?', 'left');
+        button(t.revGeoCode, '&#9873;?', 'left');
         button(t.markerToCenter, '&#9873;', 'right');
         button(t.centerOnMarker, '&#x2750;', 'right');
         button(t.togglePrefs, '&#9881;', 'right');
+
         t.revGeoCodeResultsHide.html('&times;').css('cursor', 'pointer');
 
         prefsButton(t.storeZoomLevel, 'store zoom level');
@@ -317,10 +352,11 @@ SOFTWARE.
         prefsButton(t.storeMarkerCount, 'store markers count');
         prefsButton(t.clearPreferences, 'clear storage data');
 
-        t.geoCodeInput.css('float', 'left');
+        t.geoCodeInput.css({ 'float' : 'left' });
 
         // other elements
-        t.spacer.css('width', '12px').css('height', '12px').css('padding', '1px').css('margin', '1px').css('float', 'right');
+        spacer(t.spacerRight, 'right');
+        spacer(t.spacerLeft, 'left');
 
         /**
          * attach events
