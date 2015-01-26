@@ -75,15 +75,20 @@ SOFTWARE.
         GI.marker     = new google.maps.Marker();
 
         settings = $.extend({
-            apikey     : "<APIKEY>",
-            width      : "300px",
-            height     : "150px",
-            bgColorMap : "#A3C3FF",
-            bgColor    : '#DDD',
-            txtColor   : '#000',
-            precision  : 6,
-            zoomLevel  : 2,
-            mapCenter  : '0,0'
+            apikey           : "<APIKEY>",
+            width            : "300px",
+            height           : "150px",
+            bgColorMap       : "#A3C3FF",
+            bgColor          : '#DDD',
+            txtColor         : '#000',
+            precision        : 6,
+            zoomLevel        : 2,
+            mapCenter        : '0,0',
+            i_geoCode        : '&#9992;',
+            i_revGeoCode     : '&#9873;?',
+            i_markerToCenter : '&#9873;',
+            i_centerOnMarker : '&#x2750;',
+            i_togglePrefs    : '&#9881;'
         }, options);
 
         /** 
@@ -339,11 +344,11 @@ SOFTWARE.
         });
         t.latLngDisplay.html('0,0');
 
-        button(t.geoCode, '&#9992;', 'left');
-        button(t.revGeoCode, '&#9873;?', 'left');
-        button(t.markerToCenter, '&#9873;', 'right');
-        button(t.centerOnMarker, '&#x2750;', 'right');
-        button(t.togglePrefs, '&#9881;', 'right');
+        button(t.geoCode, settings.i_geoCode, 'left');
+        button(t.revGeoCode, settings.i_revGeoCode, 'left');
+        button(t.markerToCenter, settings.i_markerToCenter, 'right');
+        button(t.centerOnMarker, settings.i_centerOnMarker, 'right');
+        button(t.togglePrefs, settings.i_togglePrefs, 'right');
 
         t.revGeoCodeResultsHide.html('&times;').css('cursor', 'pointer');
 
