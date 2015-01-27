@@ -3,7 +3,7 @@ Geolocation input type for html forms. jQuery plugin. Requires on Google Maps v3
 
 1/27/15 - New Features
 * Multiple maps
-* No API key required
+* UI adjusts dependent on apikey being used
 
 1/22/15 - New Features!
 * Control panel for session storage of zoom and map center
