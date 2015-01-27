@@ -167,8 +167,8 @@ SOFTWARE.
         t.geoControls  = $('    <div/>').appendTo(t.geoInput);
         t.clear        = $('        <div style="clear:both"></div>').appendTo(t.geoControls);
         t.rGeoResults  = $('    <div/>').appendTo(t.geoInput);
-        t.rgcTable     = $('        <table>').appendTo(t.rGeoControls);
-        t.rgctHead     = $('            <thead>').appendTo(t.rgcTable);
+        t.rgcTable     = $('        <table>').appendTo(t.rGeoResults);
+        t.rgcHead      = $('            <thead>').appendTo(t.rgcTable);
         t.rgcTr        = $('                <tr>').appendTo(t.rgcHead);
         t.rgcTh1       = $('                    <th>&nbsp;&nbsp;&nbsp;Result Sets Found:</th>').appendTo(t.rgcTr);
         t.rgcTh2       = $('                    <th></th>').appendTo(t.rgcTr);
@@ -211,7 +211,7 @@ SOFTWARE.
         $(t.rgcTh1).prepend(t.revGeoCodeResultsHide);
         $(t.rgcTh1).append(t.revGeoCodeFoundCount);
 
-        $(t.rGeoResults).append(t.revGeoCodeResultsBody);
+        $(t.rgcTable).append(t.revGeoCodeResultsBody);
         $(t.rGeoResults).after(t.latInput, t.lngInput, t.hiddenInputs);
 
         t.prefsPanel.append(t.storeZoomLevel, t.storeMapCenter, t.clearPreferences); // todo: t.storeMarkerCount
@@ -309,21 +309,25 @@ SOFTWARE.
             'clear'            : 'both',
             'display'          : 'none',
             'left'             : '-1px',
-            'width'            : 'calc(' + settings.width + ' - 8px,',
+            'width'            : 'calc(' + settings.width + ' - 8px)',
             'background-color' : '#FFF',
             'border'           : '2px solid #CCC',
             'position'         : 'absolute',
             'z-index'          : '5555',
-            'font-size'        : '12px',
-            'font-family'      : 'Arial',
+            'text-align'       : 'left',
             'padding'          : '3px'
         });
+        
+        t.rgcTable.css({
+            'font-size'        : '12px',
+            'font-family'      : 'Arial'
+        });        
 
         t.prefsPanel.css({
             'clear'             : 'both',
             'display'           : 'none',
             'left'              : '-1px',
-            'width'             : 'calc(' + settings.width + ' - 2px,',
+            'width'             : 'calc(' + settings.width + ' - 2px)',
             'background-color'  : '#DDD',
             'border'            : '2px solid #CCC',
             'position'          : 'absolute',
