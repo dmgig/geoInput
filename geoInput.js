@@ -36,28 +36,32 @@ SOFTWARE.
 /*jslint browser: true, todo: true, devel: true */
 /*properties
     LatLng, Map, Marker, addListener, address_components, after, apikey, append,
-    appendTo, 'background-color', bgColor, bgColorMap, bgcolor, border,
-    'border-radius', center, centerOnMarker, centerToMarker, clear,
-    clearPreferences, click, closest, color, css, cursor, data, display,
-    dmgig_mapCenter, dmgig_zoomLevel, empty, event, extend, fail, float, fn,
-    'font-family', 'font-size', geoCode, geoCodeInput, geoControls, geoInput,
-    geocodeTextLocation, geometry, get, getCenter, getElementById, getItem,
-    getMapId, getPosition, getStoredMapCenter, getStoredZoom, getZoom, height,
-    hiddenInputs, hide, hover, html, id, initialize, join, lat, latInput,
-    latLngDisplay, latLngGoogleToString, latLngStringToGoogle, left, length, lng,
-    lngInput, location, log, long_name, map, mapCenter, mapControls, mapOptions,
-    mapid, maps, margin, 'margin-bottom', marker, markerToCenter, name, on,
+    appendTo, attr, 'background-color', bgColor, bgColorMap, bgcolor, border,
+    'border-radius', center, centerOnMarker, centerStore, centerToMarker, clear,
+    clearPreferences, click, closest, color, css, cursor, data, display, empty,
+    event, extend, fail, float, fn, 'font-family', 'font-size', geoCode,
+    geoCodeInput, geoControls, geoInput, geocodeTextLocation, geometry, get,
+    getCenter, getElementById, getInputId, getItem, getPosition,
+    getStoredMapCenter, getStoredZoom, getZoom, height, hiddenInputs, hide,
+    hover, html, i_centerOnMarker, i_geoCode, i_markerToCenter, i_revGeoCode,
+    i_togglePrefs, id, initialize, join, lat, latInput, latLngDisplay,
+    latLngGoogleToString, latLngStringToGoogle, left, length, lng, lngInput,
+    location, log, long_name, map, mapCenter, mapControls, mapOptions, maps,
+    margin, 'margin-bottom', marker, markerToCenter, 'min-width', name, on,
     padding, parent_form, position, precision, prefs, prefsPanel, prepend, prop,
-    rGeoControls, rGeoResults, random, removeItem, results, revGeoCode,
-    revGeoCodeFoundCount, revGeoCodeResultsBody, revGeoCodeResultsHide,
+    rGeoResults, removeItem, results, revGeoCode, revGeoCodeFoundCount,
+    revGeoCodeResultsBody, revGeoCodeResultsHide,
     revGeocodeResultsAddHiddenInputs, revGeocodeResultsMakeRow,
     reverseGeocodeMarkerPosition, rgcHead, rgcTable, rgcTh1, rgcTh2, rgcTr,
-    rgctHead, setCenter, setDraggable, setLatLngInputs, setMap, setPosition,
-    short_name, show, slideToggle, spacer, split, storeMapCenter,
-    storeMarkerCount, storeZoomLevel, substring, 'text-align', title, toFixed,
-    toString, togglePrefs, txtColor, type, types, val, value, watchMarkerMove,
-    width, 'z-index', zoom, zoomLevel
+    setCenter, setDraggable, setItem, setLatLngInputs, setMap, setPosition,
+    short_name, show, slideToggle, spacerLeft, spacerRight, split,
+    storeMapCenter, storeMarkerCount, storeZoomLevel, 'text-align', title,
+    toFixed, toString, togglePrefs, txtColor, type, types, val,
+    validateUniqueElementId, value, watchMarkerMove, width, 'z-index', zoom,
+    zoomLevel, zoomStore
 */
+
+
 
 (function ($) {
 
@@ -72,7 +76,7 @@ SOFTWARE.
         GI.map        = null;
         GI.mapOptions = {};
         GI.marker     = new google.maps.Marker();
-        
+
         /** 
          * HELPERS
          */
@@ -90,23 +94,22 @@ SOFTWARE.
             latLngGoogleToString : function (latLngGoogle) {
                 return latLngGoogle.lat().toFixed(settings.precision) + ',' + latLngGoogle.lng().toFixed(settings.precision);
             },
-            
+
             getInputId : function () {
                 var id;
                 id = GI.attr('id');
                 return id;
             },
-            
+
             validateUniqueElementId : function () {
                 var is_unique = false;
-                if($('#'+helper. getInputId()).length === 1){
+                if ($('#' + helper.getInputId()).length === 1) {
                     is_unique = true;
                 }
-                console.log('#'+helper.getInputId()+' '+is_unique);
                 return is_unique;
-            },
+            }
         };
-        
+
         /** 
          * SETTINGS
          */
@@ -132,8 +135,8 @@ SOFTWARE.
          */
         GI.prefs = {
 
-            zoomStore   : 'dmgig_'+helper.getInputId()+'_zoomLevel',
-            centerStore : 'dmgig_'+helper.getInputId()+'_mapCenter',
+            zoomStore   : 'dmgig_' + helper.getInputId() + '_zoomLevel',
+            centerStore : 'dmgig_' + helper.getInputId() + '_mapCenter',
 
             storeZoomLevel : function () {
                 sessionStorage.setItem(GI.prefs.zoomStore, GI.map.getZoom());
@@ -177,8 +180,8 @@ SOFTWARE.
          * layout html */
         t = {};
         // main template
-        t.geoInput     = $('<div/>', { id : 'dmgig_geoInput_'+helper.getInputId() });
-        t.map          = $('    <div/>', { id : 'dmgig_map_'+helper.getInputId() }).appendTo(t.geoInput);
+        t.geoInput     = $('<div/>', { id : 'dmgig_geoInput_' + helper.getInputId() });
+        t.map          = $('    <div/>', { id : 'dmgig_map_' + helper.getInputId() }).appendTo(t.geoInput);
         t.mapControls  = $('    <div/>').appendTo(t.geoInput);
         t.geoControls  = $('    <div/>').appendTo(t.geoInput);
         t.clear        = $('        <div style="clear:both"></div>').appendTo(t.geoControls);
@@ -222,8 +225,8 @@ SOFTWARE.
          * ATTACH interactive elements */
         t.mapControls.append(t.latLngDisplay);
 
-        if(settings.apikey !== "<APIKEY>" && settings.apikey !== ''){
-            t.geoControls.prepend(t.geoCode, 
+        if (settings.apikey !== "<APIKEY>" && settings.apikey !== '') {
+            t.geoControls.prepend(t.geoCode,
                                   t.geoCodeInput,
                                   t.spacerLeft,
                                   t.revGeoCode,
@@ -231,8 +234,8 @@ SOFTWARE.
                                   t.spacerRight,
                                   t.markerToCenter,
                                   t.centerOnMarker);
-         }else{
-            t.geoControls.prepend(t.geoCode, 
+        } else {
+            t.geoControls.prepend(t.geoCode,
                                   t.geoCodeInput,
                                   t.spacerLeft,
                                   t.togglePrefs,
@@ -245,7 +248,7 @@ SOFTWARE.
         t.rgcTh1.append(t.revGeoCodeFoundCount);
 
         t.rgcTable.append(t.revGeoCodeResultsBody);
-        
+
         t.rGeoResults.after(t.latInput,
                             t.lngInput,
                             t.hiddenInputs);
@@ -253,7 +256,7 @@ SOFTWARE.
         t.prefsPanel.append(t.storeZoomLevel,
                             t.storeMapCenter,
                             t.clearPreferences); // todo: t.storeMarkerCount
-        
+
         t.geoControls.after(t.prefsPanel);
 
         /**
@@ -304,7 +307,7 @@ SOFTWARE.
             });
             selector.html(content);
             selector.hover(function () {
-               selector.css({
+                selector.css({
                     'color' : settings.bgcolor,
                     'background-color' : settings.color
                 });
@@ -356,11 +359,11 @@ SOFTWARE.
             'text-align'       : 'left',
             'padding'          : '3px'
         });
-    
+
         t.rgcTable.css({
             'font-size'        : '12px',
             'font-family'      : 'Arial'
-        });        
+        });
 
         t.prefsPanel.css({
             'clear'             : 'both',
@@ -447,7 +450,7 @@ SOFTWARE.
                 center : settings.mapCenter
             };
 
-            GI.map = new google.maps.Map(document.getElementById('dmgig_map_'+helper.getInputId()), GI.mapOptions);
+            GI.map = new google.maps.Map(document.getElementById('dmgig_map_' + helper.getInputId()), GI.mapOptions);
 
             GI.marker.setPosition(settings.mapCenter);
             GI.marker.setMap(GI.map);
@@ -575,8 +578,8 @@ SOFTWARE.
         });
 
         /** INITIALIZE */
-        
-        if(!helper.validateUniqueElementId()){
+
+        if (!helper.validateUniqueElementId()) {
             console.log('geoInput Err: input elements require unique ids.');
             return false;
         }
