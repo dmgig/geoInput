@@ -59,7 +59,6 @@ SOFTWARE.
     width, 'z-index', zoom, zoomLevel
 */
 
-
 (function ($) {
 
     'use strict';
@@ -73,7 +72,44 @@ SOFTWARE.
         GI.map        = null;
         GI.mapOptions = {};
         GI.marker     = new google.maps.Marker();
+        
+        /** 
+         * HELPERS
+         */
+        helper = {
 
+            /**
+             * latLng string to to google obj. '0,0'
+             */
+            latLngStringToGoogle : function (latLngString) {
+                var center;
+                center = latLngString.split(',');
+                return new google.maps.LatLng(center[0], center[1]);
+            },
+
+            latLngGoogleToString : function (latLngGoogle) {
+                return latLngGoogle.lat().toFixed(settings.precision) + ',' + latLngGoogle.lng().toFixed(settings.precision);
+            },
+            
+            getInputId : function () {
+                var id;
+                id = GI.attr('id');
+                return id;
+            },
+            
+            validateUniqueElementId : function () {
+                var is_unique = false;
+                if($('#'+helper. getInputId()).length === 1){
+                    is_unique = true;
+                }
+                console.log('#'+helper.getInputId()+' '+is_unique);
+                return is_unique;
+            },
+        };
+        
+        /** 
+         * SETTINGS
+         */
         settings = $.extend({
             apikey           : "<APIKEY>",
             width            : "300px",
@@ -91,71 +127,48 @@ SOFTWARE.
             i_togglePrefs    : '&#9881;'
         }, options);
 
-        /** 
-         * HELPERS
-         */
-        helper = {
-
-            /**
-             * google maps requires a distinct id, so if someone wants more than one on a page, we'll need to generate random id
-             */
-            getMapId : function () {
-                return 'dmgig_' + (Math.random() + 1).toString(36).substring(2, 7);
-            },
-
-            /**
-             * latLng string to to google obj. '0,0'
-             */
-            latLngStringToGoogle : function (latLngString) {
-                var center;
-                center = latLngString.split(',');
-                return new google.maps.LatLng(center[0], center[1]);
-            },
-
-            latLngGoogleToString : function (latLngGoogle) {
-                return latLngGoogle.lat().toFixed(settings.precision) + ',' + latLngGoogle.lng().toFixed(settings.precision);
-            }
-        };
-
         /**
          * PREFERENCES
          */
         GI.prefs = {
 
+            zoomStore   : 'dmgig_'+helper.getInputId()+'_zoomLevel',
+            centerStore : 'dmgig_'+helper.getInputId()+'_mapCenter',
+
             storeZoomLevel : function () {
-                sessionStorage.dmgig_zoomLevel = GI.map.getZoom();
+                sessionStorage.setItem(GI.prefs.zoomStore, GI.map.getZoom());
                 console.log(sessionStorage);
             },
 
             storeMapCenter : function () {
-                sessionStorage.dmgig_mapCenter = helper.latLngGoogleToString(GI.map.getCenter());
+                sessionStorage.setItem(GI.prefs.centerStore, helper.latLngGoogleToString(GI.map.getCenter()));
                 console.log(sessionStorage);
             },
 
             //storeMarkerCount : function () {}, // todo
 
             getStoredZoom : function () {
-                return parseInt(sessionStorage.dmgig_zoomLevel, 10);
+                return parseInt(sessionStorage.getItem(GI.prefs.zoomStore), 10);
             },
 
             getStoredMapCenter : function () {
-                return helper.latLngStringToGoogle(sessionStorage.dmgig_mapCenter);
+                return helper.latLngStringToGoogle(sessionStorage.getItem(GI.prefs.centerStore));
             },
 
             //getMarkerCount : function () {}, // todo
 
             clearPreferences : function () {
-                sessionStorage.removeItem('dmgig_zoomLevel');
-                sessionStorage.removeItem('dmgig_mapCenter');
-                sessionStorage.removeItem('dmgig_markerCount');
+                sessionStorage.removeItem(GI.prefs.zoomStore);
+                sessionStorage.removeItem(GI.prefs.centerStore);
+                //sessionStorage.removeItem('dmgig_'+GI.mapId+'_markerCount');
                 console.log(sessionStorage);
             }
         };
 
         // set prefs options
         settings.mapCenter = helper.latLngStringToGoogle(settings.mapCenter);
-        if (sessionStorage.getItem('dmgig_zoomLevel') !== null) { settings.zoomLevel = GI.prefs.getStoredZoom(); }
-        if (sessionStorage.getItem('dmgig_mapCenter') !== null) { settings.mapCenter = GI.prefs.getStoredMapCenter(); }
+        if (sessionStorage.getItem(GI.prefs.zoomStore)   !== null) { settings.zoomLevel = GI.prefs.getStoredZoom(); }
+        if (sessionStorage.getItem(GI.prefs.centerStore) !== null) { settings.mapCenter = GI.prefs.getStoredMapCenter(); }
 
         // wipe
         this.empty();
@@ -164,10 +177,8 @@ SOFTWARE.
          * layout html */
         t = {};
         // main template
-        t.mapid = helper.getMapId();
-
-        t.geoInput     = $('<div/>', { id : 'dmgig_geoInput' });
-        t.map          = $('    <div/>', { id : t.mapid }).appendTo(t.geoInput);
+        t.geoInput     = $('<div/>', { id : 'dmgig_geoInput_'+helper.getInputId() });
+        t.map          = $('    <div/>', { id : 'dmgig_map_'+helper.getInputId() }).appendTo(t.geoInput);
         t.mapControls  = $('    <div/>').appendTo(t.geoInput);
         t.geoControls  = $('    <div/>').appendTo(t.geoInput);
         t.clear        = $('        <div style="clear:both"></div>').appendTo(t.geoControls);
@@ -209,18 +220,41 @@ SOFTWARE.
 
         /**
          * ATTACH interactive elements */
-        $(t.mapControls).append(t.latLngDisplay);
+        t.mapControls.append(t.latLngDisplay);
 
-        $(t.geoControls).prepend(t.geoCode, t.geoCodeInput, t.spacerLeft, t.revGeoCode, t.togglePrefs, t.spacerRight, t.markerToCenter, t.centerOnMarker);
+        if(settings.apikey !== "<APIKEY>" && settings.apikey !== ''){
+            t.geoControls.prepend(t.geoCode, 
+                                  t.geoCodeInput,
+                                  t.spacerLeft,
+                                  t.revGeoCode,
+                                  t.togglePrefs,
+                                  t.spacerRight,
+                                  t.markerToCenter,
+                                  t.centerOnMarker);
+         }else{
+            t.geoControls.prepend(t.geoCode, 
+                                  t.geoCodeInput,
+                                  t.spacerLeft,
+                                  t.togglePrefs,
+                                  t.spacerRight,
+                                  t.markerToCenter,
+                                  t.centerOnMarker);
+        }
 
-        $(t.rgcTh1).prepend(t.revGeoCodeResultsHide);
-        $(t.rgcTh1).append(t.revGeoCodeFoundCount);
+        t.rgcTh1.prepend(t.revGeoCodeResultsHide);
+        t.rgcTh1.append(t.revGeoCodeFoundCount);
 
-        $(t.rgcTable).append(t.revGeoCodeResultsBody);
-        $(t.rGeoResults).after(t.latInput, t.lngInput, t.hiddenInputs);
+        t.rgcTable.append(t.revGeoCodeResultsBody);
+        
+        t.rGeoResults.after(t.latInput,
+                            t.lngInput,
+                            t.hiddenInputs);
 
-        t.prefsPanel.append(t.storeZoomLevel, t.storeMapCenter, t.clearPreferences); // todo: t.storeMarkerCount
-        $(t.geoControls).after(t.prefsPanel);
+        t.prefsPanel.append(t.storeZoomLevel,
+                            t.storeMapCenter,
+                            t.clearPreferences); // todo: t.storeMarkerCount
+        
+        t.geoControls.after(t.prefsPanel);
 
         /**
          * CSS */
@@ -242,12 +276,12 @@ SOFTWARE.
             });
             selector.html(content);
             selector.hover(function () {
-                $(this).css({
+                selector.css({
                     'color' : settings.bgcolor,
                     'background-color' : settings.color
                 });
             }, function () {
-                $(this).css({
+                selector.css({
                     'color' : settings.color,
                     'background-color' : settings.bgColor
                 });
@@ -270,12 +304,12 @@ SOFTWARE.
             });
             selector.html(content);
             selector.hover(function () {
-                $(this).css({
+               selector.css({
                     'color' : settings.bgcolor,
                     'background-color' : settings.color
                 });
             }, function () {
-                $(this).css({
+                selector.css({
                     'color' : settings.color,
                     'background-color' : settings.bgColor
                 });
@@ -322,7 +356,7 @@ SOFTWARE.
             'text-align'       : 'left',
             'padding'          : '3px'
         });
-        
+    
         t.rgcTable.css({
             'font-size'        : '12px',
             'font-family'      : 'Arial'
@@ -413,7 +447,7 @@ SOFTWARE.
                 center : settings.mapCenter
             };
 
-            GI.map = new google.maps.Map(document.getElementById(t.mapid), GI.mapOptions);
+            GI.map = new google.maps.Map(document.getElementById('dmgig_map_'+helper.getInputId()), GI.mapOptions);
 
             GI.marker.setPosition(settings.mapCenter);
             GI.marker.setMap(GI.map);
@@ -541,8 +575,12 @@ SOFTWARE.
         });
 
         /** INITIALIZE */
+        
+        if(!helper.validateUniqueElementId()){
+            console.log('geoInput Err: input elements require unique ids.');
+            return false;
+        }
         this.initialize();
-
     };
 
 }(jQuery));
