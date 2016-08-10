@@ -73,7 +73,8 @@ SOFTWARE.
       GI  = this, 
       $GI = $(this),
       $GIid = $GI.attr('id'),
-      helper, 
+      Helper, 
+      Prefs,
       settings,
       t;
 
@@ -122,7 +123,7 @@ SOFTWARE.
     /**
      * PREFERENCES
      */
-    var Prefs = function(){
+    Prefs = function(){
 
       var 
         zoomStoreKey   = 'dmgig_' + $GIid + '_zoomLevel',
@@ -155,7 +156,15 @@ SOFTWARE.
           console.log(sessionStorage);
         }
       }
-    };
+    }();
+
+    // set prefs options
+    settings.mapCenter = Helper.latLngStringToGoogle(settings.mapCenter);
+    if (Prefs.getStoredZoom()      !== null) { settings.zoomLevel = Prefs.getStoredZoom(); }
+    if (Prefs.getStoredMapCenter() !== null) { settings.mapCenter = Prefs.getStoredMapCenter(); }
+
+    // wipe
+    $GI.empty();
 
     /**
      * layout html */
