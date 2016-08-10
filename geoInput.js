@@ -265,6 +265,7 @@ SOFTWARE.
             selector.css({
                 'width'             : "16px",
                 'height'            : "16px",
+                'padding'           : "3px 2px",
                 'float'             : float,
                 'color'             : settings.color,
                 'background-color'  : settings.bgcolor,
@@ -275,17 +276,6 @@ SOFTWARE.
                         .attr("src", content)
                         .css({ width: "16px", height: "16px" });
             selector.html(content);
-            selector.hover(function () {
-                selector.css({
-                    'color' : settings.bgcolor,
-                    'background-color' : settings.color
-                });
-            }, function () {
-                selector.css({
-                    'color' : settings.color,
-                    'background-color' : settings.bgColor
-                });
-            });
             return selector;
         }
 
@@ -326,11 +316,11 @@ SOFTWARE.
             return selector;
         }
 
-
         t.geoInput.css({
-            'width'    : settings.width,
-            'position' : 'relative',
-            'border'   : '1px solid #AAA'
+            'font-family': 'Arial',
+            'width'      : settings.width,
+            'position'   : 'relative',
+            'border'     : '1px solid #AAA'
         });
 
         t.map.css({
@@ -374,9 +364,10 @@ SOFTWARE.
         });
 
         t.latLngDisplay.css({
+            'font-family'      : 'monospace',
             'font-size'        : '12px',
             'text-align'       : 'center',
-            'background-color' : '#666',
+            'background-color' : '#333',
             'color'            : '#FFF',
             'margin-bottom'    : '2px'
         });
