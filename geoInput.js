@@ -84,8 +84,7 @@ SOFTWARE.
     /** 
      * HELPERS
      */
-    helper = {
-
+    Helper = {
       /**
        * latLng string to to google obj. '0,0'
        */
@@ -109,19 +108,14 @@ SOFTWARE.
      */
     settings = $.extend({
       apikey       : "<APIKEY>",
-      width      : "300px",
+      width        : "300px",
       height       : "150px",
-      bgColorMap     : "#A3C3FF",
+      bgColorMap   : "#A3C3FF",
       bgColor      : '#DDD',
       txtColor     : '#000',
       precision    : 6,
       zoomLevel    : 2,
-      mapCenter    : '0,0',
-      i_geoCode    : '&#9992;',
-      i_revGeoCode   : '&#9873;?',
-      i_markerToCenter : '&#9873;',
-      i_centerOnMarker : '&#x2750;',
-      i_togglePrefs  : '&#9881;'
+      mapCenter    : '0,0'
     }, options);
 
 
@@ -142,7 +136,7 @@ SOFTWARE.
         },
 
         storeMapCenter : function (center) {
-          sessionStorage.setItem(centerStoreKey, helper.latLngGoogleToString(center));
+          sessionStorage.setItem(centerStoreKey, Helper.latLngGoogleToString(center));
           console.log(sessionStorage);
         },
 
@@ -152,7 +146,7 @@ SOFTWARE.
 
         getStoredMapCenter : function () {
           console.log(sessionStorage);
-          return helper.latLngStringToGoogle(sessionStorage.getItem(centerStoreKey));
+          return Helper.latLngStringToGoogle(sessionStorage.getItem(centerStoreKey));
         },
         
         clearPreferences : function () {
@@ -162,16 +156,6 @@ SOFTWARE.
         }
       }
     };
-    
-    Prefs = new Prefs();
-
-    // set prefs options
-    settings.mapCenter = helper.latLngStringToGoogle(settings.mapCenter);
-    if (Prefs.getStoredZoom()      !== null) { settings.zoomLevel = Prefs.getStoredZoom(); }
-    if (Prefs.getStoredMapCenter() !== null) { settings.mapCenter = Prefs.getStoredMapCenter(); }
-
-    // wipe
-    this.empty();
 
     /**
      * layout html */
@@ -566,7 +550,7 @@ SOFTWARE.
 
     /** INITIALIZE */
 
-    if (!helper.validateUniqueElementId($GI)) {
+    if (!Helper.validateUniqueElementId($GI)) {
       console.log('geoInput Err: input elements require unique ids.');
       return false;
     }
