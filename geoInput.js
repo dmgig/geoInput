@@ -63,7 +63,7 @@ SOFTWARE.
 
 
 
-(function ($) {
+(function ($, google, icons) {
 
     'use strict';
 
@@ -263,20 +263,17 @@ SOFTWARE.
          * CSS */
         function button(selector, content, float) {
             selector.css({
+                'width'             : "16px",
+                'height'            : "16px",
                 'float'             : float,
-                'height'            : '12px',
-                'min-width'         : '12px',
-                'padding'           : '1px',
-                'margin'            : '1px',
-                'border'            : '1px solid #999',
-                'border-radius'     : '4px',
                 'color'             : settings.color,
                 'background-color'  : settings.bgcolor,
                 'text-align'        : 'center',
-                'font-size'         : '12px',
-                'font-family'       : 'console',
                 'cursor'            : 'pointer'
             });
+            content = $("<img />")
+                        .attr("src", content)
+                        .css({ width: "16px", height: "16px" });
             selector.html(content);
             selector.hover(function () {
                 selector.css({
@@ -294,11 +291,9 @@ SOFTWARE.
 
         function prefsButton(selector, content) {
             selector.css({
-                'height'            : '12px',
+                'height'            : '16px',
                 'padding'           : '1px',
                 'margin'            : '1px',
-                'border'            : '1px solid #999',
-                'border-radius'     : '4px',
                 'color'             : settings.color,
                 'background-color'  : settings.bgcolor,
                 'font-size'         : '12px',
@@ -322,8 +317,8 @@ SOFTWARE.
 
         function spacer(selector, float) {
             selector.css({
-                'width'   : '12px',
-                'height'  : '12px',
+                'width'   : '16px',
+                'height'  : '16px',
                 'padding' : '1px',
                 'margin'  : '1px',
                 'float'   : float
@@ -365,7 +360,9 @@ SOFTWARE.
             'font-family'      : 'Arial'
         });
 
-        t.prefsPanel.css({
+        t.prefsPanel
+        .append($("<img />").attr("src", icons.gear))
+        .css({
             'clear'             : 'both',
             'display'           : 'none',
             'left'              : '-1px',
@@ -385,11 +382,11 @@ SOFTWARE.
         });
         t.latLngDisplay.html('0,0');
 
-        button(t.geoCode, settings.i_geoCode, 'left');
-        button(t.revGeoCode, settings.i_revGeoCode, 'left');
-        button(t.markerToCenter, settings.i_markerToCenter, 'right');
-        button(t.centerOnMarker, settings.i_centerOnMarker, 'right');
-        button(t.togglePrefs, settings.i_togglePrefs, 'right');
+        button(t.geoCode,        icons.plane,  'left');
+        button(t.revGeoCode,     icons.find,   'left');
+        button(t.markerToCenter, icons.center, 'right');
+        button(t.centerOnMarker, icons.marker, 'right');
+        button(t.togglePrefs,    icons.gear,   'right');
 
         t.revGeoCodeResultsHide.html('&times;').css('cursor', 'pointer');
 
@@ -530,6 +527,8 @@ SOFTWARE.
             s_latLng = latLng.lat().toString() + ',' + latLng.lng().toString();
             uriEncodedLatLng = encodeURIComponent(s_latLng);
 
+            console.log(settings.apikey)
+
             $.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + uriEncodedLatLng + '&location_type=ROOFTOP&result_type=street_address&key=' + settings.apikey, function (data) {
 
                 var components, i;
@@ -583,7 +582,8 @@ SOFTWARE.
             console.log('geoInput Err: input elements require unique ids.');
             return false;
         }
+        console.log(settings.apikey)
         this.initialize();
     };
 
-}(jQuery));
+}(jQuery, google, dmgig_icons));
