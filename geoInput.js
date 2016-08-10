@@ -69,9 +69,13 @@ SOFTWARE.
 
     $.fn.geoInput = function (options) {
 
-        var GI, helper, settings, t;
-
-        GI = this;
+        var 
+          GI  = this, 
+          $GI = $(this),
+          $GIid = $GI.attr('id'),
+          helper, 
+          settings,
+          t;
 
         GI.map        = null;
         GI.mapOptions = {};
@@ -95,18 +99,8 @@ SOFTWARE.
                 return latLngGoogle.lat().toFixed(settings.precision) + ',' + latLngGoogle.lng().toFixed(settings.precision);
             },
 
-            getInputId : function () {
-                var id;
-                id = GI.attr('id');
-                return id;
-            },
-
-            validateUniqueElementId : function () {
-                var is_unique = false;
-                if ($('#' + helper.getInputId()).length === 1) {
-                    is_unique = true;
-                }
-                return is_unique;
+            validateUniqueElementId : function (el) {
+                return $('#'+$GIid).length === 1 ? true : false;
             }
         };
 
@@ -135,8 +129,8 @@ SOFTWARE.
          */
         GI.prefs = {
 
-            zoomStore   : 'dmgig_' + helper.getInputId() + '_zoomLevel',
-            centerStore : 'dmgig_' + helper.getInputId() + '_mapCenter',
+            zoomStore   : 'dmgig_' + $GIid + '_zoomLevel',
+            centerStore : 'dmgig_' + $GIid + '_mapCenter',
 
             storeZoomLevel : function () {
                 sessionStorage.setItem(GI.prefs.zoomStore, GI.map.getZoom());
@@ -180,8 +174,8 @@ SOFTWARE.
          * layout html */
         t = {};
         // main template
-        t.geoInput     = $('<div/>', { id : 'dmgig_geoInput_' + helper.getInputId() });
-        t.map          = $('    <div/>', { id : 'dmgig_map_' + helper.getInputId() }).appendTo(t.geoInput);
+        t.geoInput     = $('<div/>', { id : 'dmgig_geoInput_' + $GIid });
+        t.map          = $('    <div/>', { id : 'dmgig_map_' + $GIid }).appendTo(t.geoInput);
         t.mapControls  = $('    <div/>').appendTo(t.geoInput);
         t.geoControls  = $('    <div/>').appendTo(t.geoInput);
         t.clear        = $('        <div style="clear:both"></div>').appendTo(t.geoControls);
@@ -420,13 +414,13 @@ SOFTWARE.
         t.revGeoCodeResultsHide.on('click', function () { t.rGeoResults.hide(); });
 
         t.togglePrefs.click(function () {
-            var clicks = $(this).data('clicks');
+            var clicks = $GI.data('clicks');
             if (clicks) {
                 t.prefsPanel.slideToggle();
             } else {
                 t.prefsPanel.slideToggle();
             }
-            $(this).data("clicks", !clicks);
+            $GI.data("clicks", !clicks);
         });
 
         /**
@@ -438,7 +432,7 @@ SOFTWARE.
                 center : settings.mapCenter
             };
 
-            GI.map = new google.maps.Map(document.getElementById('dmgig_map_' + helper.getInputId()), GI.mapOptions);
+            GI.map = new google.maps.Map(document.getElementById('dmgig_map_' + $GIid), GI.mapOptions);
 
             GI.marker.setPosition(settings.mapCenter);
             GI.marker.setMap(GI.map);
@@ -558,7 +552,7 @@ SOFTWARE.
          * because disabled elements in some browsers won't respond to jQuery, we just wait for the serialization to happen
          * and then re-enable the fields
          */
-        GI.parent_form = $(this).closest('form');
+        GI.parent_form = $GI.closest('form');
         GI.parent_form.on('submit', function () {
             t.geoCodeInput.prop('disabled', true); // disable the search input so it doesn't appear in results
             setTimeout(function () { // re-enable the search_input field after serialize has executed
@@ -569,7 +563,7 @@ SOFTWARE.
 
         /** INITIALIZE */
 
-        if (!helper.validateUniqueElementId()) {
+        if (!helper.validateUniqueElementId($GI)) {
             console.log('geoInput Err: input elements require unique ids.');
             return false;
         }
