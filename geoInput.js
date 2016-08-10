@@ -75,8 +75,8 @@ SOFTWARE.
       $GIid = $GI.attr('id'),
       Helper, 
       Prefs,
-      settings,
-      t;
+      Layout,
+      settings;
 
     GI.map    = null;
     GI.mapOptions = {};
@@ -90,8 +90,7 @@ SOFTWARE.
        * latLng string to to google obj. '0,0'
        */
       latLngStringToGoogle : function (latLngString) {
-        var center;
-        center = latLngString.split(',');
+        var center = latLngString.split(',');
         return new google.maps.LatLng(center[0], center[1]);
       },
 
@@ -142,17 +141,22 @@ SOFTWARE.
         },
 
         getStoredZoom : function () {
-          return parseInt(sessionStorage.getItem(zoomStoreKey), 10);
+          var zoom = sessionStorage.getItem(zoomStoreKey);
+          if(zoom !== null) zoom = parseInt(zoom);
+          console.log(zoom);
+          return zoom;
         },
 
         getStoredMapCenter : function () {
-          console.log(sessionStorage);
-          return Helper.latLngStringToGoogle(sessionStorage.getItem(centerStoreKey));
+          var center = sessionStorage.getItem(centerStoreKey);
+          if(center != null) center = Helper.latLngStringToGoogle(center);
+          console.log(center);
+          return center;
         },
         
         clearPreferences : function () {
-          sessionStorage.removeItem(Prefs.zoomStore);
-          sessionStorage.removeItem(Prefs.centerStore);
+          sessionStorage.removeItem(zoomStoreKey);
+          sessionStorage.removeItem(centerStoreKey);
           console.log(sessionStorage);
         }
       }
@@ -160,269 +164,274 @@ SOFTWARE.
 
     // set prefs options
     settings.mapCenter = Helper.latLngStringToGoogle(settings.mapCenter);
-    if (Prefs.getStoredZoom()      !== null) { settings.zoomLevel = Prefs.getStoredZoom(); }
-    if (Prefs.getStoredMapCenter() !== null) { settings.mapCenter = Prefs.getStoredMapCenter(); }
+    if (Prefs.getStoredZoom()     ) { settings.zoomLevel = Prefs.getStoredZoom();      }
+    if (Prefs.getStoredMapCenter()) { settings.mapCenter = Prefs.getStoredMapCenter(); }
 
     // wipe
     $GI.empty();
 
-    /**
-     * layout html */
-    t = {};
-    // main template
-    t.geoInput   = $('<div/>', { id : 'dmgig_geoInput_' + $GIid });
-    t.map      = $('  <div/>', { id : 'dmgig_map_' + $GIid }).appendTo(t.geoInput);
-    t.mapControls  = $('  <div/>').appendTo(t.geoInput);
-    t.geoControls  = $('  <div/>').appendTo(t.geoInput);
-    t.clear    = $('    <div style="clear:both"></div>').appendTo(t.geoControls);
-    t.rGeoResults  = $('  <div/>').appendTo(t.geoInput);
-    t.rgcTable   = $('    <table>').appendTo(t.rGeoResults);
-    t.rgcHead    = $('      <thead>').appendTo(t.rgcTable);
-    t.rgcTr    = $('        <tr>').appendTo(t.rgcHead);
-    t.rgcTh1     = $('          <th>&nbsp;&nbsp;&nbsp;Result Sets Found:</th>').appendTo(t.rgcTr);
-    t.rgcTh2     = $('          <th></th>').appendTo(t.rgcTr);
-    this.append(t.geoInput); // append main template
+    var Layout = function(){    
+      /**
+       * layout html */
+      var t = {};
+      // main template
+      t.geoInput     = $('<div/>', { id : 'dmgig_geoInput_' + $GIid });
+      t.map          = $('  <div/>', { id : 'dmgig_map_' + $GIid }).appendTo(t.geoInput);
+      t.mapControls  = $('  <div/>').appendTo(t.geoInput);
+      t.geoControls  = $('  <div/>').appendTo(t.geoInput);
+      t.clear        = $('    <div style="clear:both"></div>').appendTo(t.geoControls);
+      t.rGeoResults  = $('  <div/>').appendTo(t.geoInput);
+      t.rgcTable     = $('    <table>').appendTo(t.rGeoResults);
+      t.rgcHead      = $('      <thead>').appendTo(t.rgcTable);
+      t.rgcTr        = $('        <tr>').appendTo(t.rgcHead);
+      t.rgcTh1       = $('          <th>&nbsp;&nbsp;&nbsp;Result Sets Found:</th>').appendTo(t.rgcTr);
+      t.rgcTh2       = $('          <th></th>').appendTo(t.rgcTr);
+      $GI.append(t.geoInput); // append main template
 
-    /**
-     * CREATE interactive and other elements */
-    // display
-    t.latLngDisplay     = $('<div/>');
-    t.revGeoCodeResultsBody = $('<tbody>');
-    t.revGeoCodeFoundCount  = $('<span/>');
-    t.prefsPanel      = $('<div/>');
-    // buttons
-    t.geoCode         = $('<div/>', { title : 'geocode from text' });
-    t.revGeoCode      = $('<div/>', { title : 'reverse geocode marker location' });
-    t.markerToCenter    = $('<div/>', { title : 'bring marker(s) to center' });
-    t.centerOnMarker    = $('<div/>', { title : 'center map on marker(s)' });
-    t.revGeoCodeResultsHide = $('<span/>', { title : 'hide results' });
-    // prefs buttons
-    t.togglePrefs       = $('<div/>', { title : 'toggle preferences' });
-    t.storeZoomLevel    = $('<div/>', { title : 'store zoom level' });
-    t.storeMapCenter    = $('<div/>', { title : 'store map center' });
-    t.storeMarkerCount    = $('<div/>', { title : 'store marker count' });
-    t.clearPreferences    = $('<div/>', { title : 'clear data storage' });
-    // inputs, and input containers
-    t.geoCodeInput      = $('<input/>');
-    t.latInput        = $('<input/>', { type : 'hidden', name : 'lat' });
-    t.lngInput        = $('<input/>', { type : 'hidden', name : 'lng' });
-    t.hiddenInputs      = $('<div/>'); // div to contain hidden inputs from geocoding results
-    // other elements
-    t.spacerRight       = $('<div/>'); // layout spacers
-    t.spacerLeft      = $('<div/>');
+      /**
+       * CREATE interactive and other elements */
+      // display
+      t.latLngDisplay     = $('<div/>');
+      t.revGeoCodeResultsBody = $('<tbody>');
+      t.revGeoCodeFoundCount  = $('<span/>');
+      t.prefsPanel      = $('<div/>');
+      // buttons
+      t.geoCode         = $('<div/>', { title : 'geocode from text' });
+      t.revGeoCode      = $('<div/>', { title : 'reverse geocode marker location' });
+      t.markerToCenter    = $('<div/>', { title : 'bring marker(s) to center' });
+      t.centerOnMarker    = $('<div/>', { title : 'center map on marker(s)' });
+      t.revGeoCodeResultsHide = $('<span/>', { title : 'hide results' });
+      // prefs buttons
+      t.togglePrefs       = $('<div/>', { title : 'toggle preferences' });
+      t.storeZoomLevel    = $('<div/>', { title : 'store zoom level' });
+      t.storeMapCenter    = $('<div/>', { title : 'store map center' });
+      t.storeMarkerCount    = $('<div/>', { title : 'store marker count' });
+      t.clearPreferences    = $('<div/>', { title : 'clear data storage' });
+      // inputs, and input containers
+      t.geoCodeInput      = $('<input/>');
+      t.latInput        = $('<input/>', { type : 'hidden', name : 'lat' });
+      t.lngInput        = $('<input/>', { type : 'hidden', name : 'lng' });
+      t.hiddenInputs      = $('<div/>'); // div to contain hidden inputs from geocoding results
+      // other elements
+      t.spacerRight       = $('<div/>'); // layout spacers
+      t.spacerLeft      = $('<div/>');
 
-    /**
-     * ATTACH interactive elements */
-    t.mapControls.append(t.latLngDisplay);
+      /**
+       * ATTACH interactive elements */
+      t.mapControls.append(t.latLngDisplay);
 
-    if (settings.apikey !== "<APIKEY>" && settings.apikey !== '') {
-      t.geoControls.prepend(t.geoCode,
-                  t.geoCodeInput,
-                  t.spacerLeft,
-                  t.revGeoCode,
-                  t.togglePrefs,
-                  t.spacerRight,
-                  t.markerToCenter,
-                  t.centerOnMarker);
-    } else {
-      t.geoControls.prepend(t.geoCode,
-                  t.geoCodeInput,
-                  t.spacerLeft,
-                  t.togglePrefs,
-                  t.spacerRight,
-                  t.markerToCenter,
-                  t.centerOnMarker);
-    }
-
-    t.rgcTh1.prepend(t.revGeoCodeResultsHide);
-    t.rgcTh1.append(t.revGeoCodeFoundCount);
-
-    t.rgcTable.append(t.revGeoCodeResultsBody);
-
-    t.rGeoResults.after(t.latInput,
-              t.lngInput,
-              t.hiddenInputs);
-
-    t.prefsPanel.append(t.storeZoomLevel,
-              t.storeMapCenter,
-              t.clearPreferences); // todo: t.storeMarkerCount
-
-    t.geoControls.after(t.prefsPanel);
-
-    /**
-     * CSS */
-    function button(selector, content, float) {
-      selector.css({
-        'width'       : "16px",
-        'height'      : "16px",
-        'padding'       : "3px 2px",
-        'float'       : float,
-        'color'       : settings.color,
-        'background-color'  : settings.bgcolor,
-        'text-align'    : 'center',
-        'cursor'      : 'pointer'
-      });
-      content = $("<img />")
-            .attr("src", content)
-            .css({ width: "16px", height: "16px" });
-      selector.html(content);
-      return selector;
-    }
-
-    function prefsButton(selector, content) {
-      selector.css({
-        'height'      : '16px',
-        'padding'       : '1px',
-        'margin'      : '1px',
-        'color'       : settings.color,
-        'background-color'  : settings.bgcolor,
-        'font-size'     : '12px',
-        'font-family'     : 'console',
-        'cursor'      : 'pointer'
-      });
-      selector.html(content);
-      selector.hover(function () {
-        selector.css({
-          'color' : settings.bgcolor,
-          'background-color' : settings.color
-        });
-      }, function () {
-        selector.css({
-          'color' : settings.color,
-          'background-color' : settings.bgColor
-        });
-      });
-      return selector;
-    }
-
-    function spacer(selector, float) {
-      selector.css({
-        'width'   : '16px',
-        'height'  : '16px',
-        'padding' : '1px',
-        'margin'  : '1px',
-        'float'   : float
-      });
-      return selector;
-    }
-
-    t.geoInput.css({
-      'font-family': 'Arial',
-      'width'    : settings.width,
-      'position'   : 'relative',
-      'border'   : '1px solid #AAA'
-    });
-
-    t.map.css({
-      'width'      : settings.width,
-      'height'       : settings.height,
-      'border'       : '1px solid #CCC',
-      'background-color' : settings.bgColor,
-      'text-align'     : 'center'
-    });
-    t.map.html('<br /><br />loading...');
-
-    t.rGeoResults.css({
-      'clear'      : 'both',
-      'display'      : 'none',
-      'left'       : '-1px',
-      'width'      : 'calc(' + settings.width + ' - 8px)',
-      'background-color' : '#FFF',
-      'border'       : '2px solid #CCC',
-      'position'     : 'absolute',
-      'z-index'      : '5555',
-      'text-align'     : 'left',
-      'padding'      : '3px'
-    });
-
-    t.rgcTable.css({
-      'font-size'    : '12px',
-      'font-family'    : 'Arial'
-    });
-
-    t.prefsPanel
-    .append($("<img />").attr("src", icons.gear))
-    .css({
-      'clear'       : 'both',
-      'display'       : 'none',
-      'left'        : '-1px',
-      'width'       : 'calc(' + settings.width + ' - 2px)',
-      'background-color'  : '#DDD',
-      'border'      : '2px solid #CCC',
-      'position'      : 'absolute',
-      'z-index'       : '9999'
-    });
-
-    t.latLngDisplay.css({
-      'font-family'    : 'monospace',
-      'font-size'    : '12px',
-      'text-align'     : 'center',
-      'background-color' : '#333',
-      'color'      : '#FFF',
-      'margin-bottom'  : '2px'
-    });
-    t.latLngDisplay.html('0,0');
-
-    button(t.geoCode,    icons.plane,  'left');
-    button(t.revGeoCode,   icons.find,   'left');
-    button(t.markerToCenter, icons.center, 'right');
-    button(t.centerOnMarker, icons.marker, 'right');
-    button(t.togglePrefs,  icons.gear,   'right');
-
-    t.revGeoCodeResultsHide.html('&times;').css('cursor', 'pointer');
-
-    prefsButton(t.storeZoomLevel, 'store zoom level');
-    prefsButton(t.storeMapCenter, 'store map center position');
-    prefsButton(t.storeMarkerCount, 'store markers count');
-    prefsButton(t.clearPreferences, 'clear storage data');
-
-    t.geoCodeInput.css({ 'float' : 'left' });
-
-    // other elements
-    spacer(t.spacerRight, 'right');
-    spacer(t.spacerLeft, 'left');
-
-    /**
-     * attach events
-     */
-    t.geoCode.on('click', function () {
-      GI.geocodeTextLocation();
-    });
-
-    t.revGeoCode.on('click', function () {
-      GI.reverseGeocodeMarkerPosition();
-    });
-
-    t.centerOnMarker.on('click', function () {
-      GI.centerToMarker();
-    });
-
-    t.markerToCenter.on('click', function () {
-      GI.markerToCenter();
-    });
-
-    t.storeZoomLevel.on('click', function () { Prefs.storeZoomLevel(GI.map.getZoom()); });
-    t.storeMapCenter.on('click', function () { Prefs.storeMapCenter(GI.map.getCenter()); });
-    // t.storeMarkerCount.on('click',function () { Prefs.storeMarkerCount() }); // todo
-    t.clearPreferences.on('click', function () { Prefs.clearPreferences(); });
-
-    // rev geocode result set actions
-    t.revGeoCodeResultsHide.on('click', function () { t.rGeoResults.hide(); });
-
-    t.togglePrefs.click(function () {
-      var clicks = $GI.data('clicks');
-      if (clicks) {
-        t.prefsPanel.slideToggle();
+      if (settings.apikey !== "<APIKEY>" && settings.apikey !== '') {
+        t.geoControls.prepend(t.geoCode,
+                    t.geoCodeInput,
+                    t.spacerLeft,
+                    t.revGeoCode,
+                    t.togglePrefs,
+                    t.spacerRight,
+                    t.markerToCenter,
+                    t.centerOnMarker);
       } else {
-        t.prefsPanel.slideToggle();
+        t.geoControls.prepend(t.geoCode,
+                    t.geoCodeInput,
+                    t.spacerLeft,
+                    t.togglePrefs,
+                    t.spacerRight,
+                    t.markerToCenter,
+                    t.centerOnMarker);
       }
-      $GI.data("clicks", !clicks);
-    });
+
+      t.rgcTh1.prepend(t.revGeoCodeResultsHide);
+      t.rgcTh1.append(t.revGeoCodeFoundCount);
+
+      t.rgcTable.append(t.revGeoCodeResultsBody);
+
+      t.rGeoResults.after(t.latInput,
+                t.lngInput,
+                t.hiddenInputs);
+
+      t.prefsPanel.append(t.storeZoomLevel,
+                t.storeMapCenter,
+                t.clearPreferences); // todo: t.storeMarkerCount
+
+      t.geoControls.after(t.prefsPanel);
+
+      /**
+       * CSS */
+      function button(selector, content, float) {
+        selector.css({
+          'width'       : "16px",
+          'height'      : "16px",
+          'padding'       : "3px 2px",
+          'float'       : float,
+          'color'       : settings.color,
+          'background-color'  : settings.bgcolor,
+          'text-align'    : 'center',
+          'cursor'      : 'pointer'
+        });
+        content = $("<img />")
+              .attr("src", content)
+              .css({ width: "16px", height: "16px" });
+        selector.html(content);
+        return selector;
+      }
+
+      function prefsButton(selector, content) {
+        selector.css({
+          'height'      : '16px',
+          'padding'       : '1px',
+          'margin'      : '1px',
+          'color'       : settings.color,
+          'background-color'  : settings.bgcolor,
+          'font-size'     : '12px',
+          'font-family'     : 'console',
+          'cursor'      : 'pointer'
+        });
+        selector.html(content);
+        selector.hover(function () {
+          selector.css({
+            'color' : settings.bgcolor,
+            'background-color' : settings.color
+          });
+        }, function () {
+          selector.css({
+            'color' : settings.color,
+            'background-color' : settings.bgColor
+          });
+        });
+        return selector;
+      }
+
+      function spacer(selector, float) {
+        selector.css({
+          'width'   : '16px',
+          'height'  : '16px',
+          'padding' : '1px',
+          'margin'  : '1px',
+          'float'   : float
+        });
+        return selector;
+      }
+
+      t.geoInput.css({
+        'font-family': 'Arial',
+        'width'    : settings.width,
+        'position'   : 'relative',
+        'border'   : '1px solid #AAA'
+      });
+
+      t.map.css({
+        'width'      : settings.width,
+        'height'       : settings.height,
+        'border'       : '1px solid #CCC',
+        'background-color' : settings.bgColor,
+        'text-align'     : 'center'
+      });
+      t.map.html('<br /><br />loading...');
+
+      t.rGeoResults.css({
+        'clear'      : 'both',
+        'display'      : 'none',
+        'left'       : '-1px',
+        'width'      : 'calc(' + settings.width + ' - 8px)',
+        'background-color' : '#FFF',
+        'border'       : '2px solid #CCC',
+        'position'     : 'absolute',
+        'z-index'      : '5555',
+        'text-align'     : 'left',
+        'padding'      : '3px'
+      });
+
+      t.rgcTable.css({
+        'font-size'    : '12px',
+        'font-family'    : 'Arial'
+      });
+
+      t.prefsPanel
+      .append($("<img />").attr("src", icons.gear))
+      .css({
+        'clear'       : 'both',
+        'display'       : 'none',
+        'left'        : '-1px',
+        'width'       : 'calc(' + settings.width + ' - 2px)',
+        'background-color'  : '#DDD',
+        'border'      : '2px solid #CCC',
+        'position'      : 'absolute',
+        'z-index'       : '9999'
+      });
+
+      t.latLngDisplay.css({
+        'font-family'    : 'monospace',
+        'font-size'    : '12px',
+        'text-align'     : 'center',
+        'background-color' : '#333',
+        'color'      : '#FFF',
+        'margin-bottom'  : '2px'
+      });
+      t.latLngDisplay.html('0,0');
+
+      button(t.geoCode,    icons.plane,  'left');
+      button(t.revGeoCode,   icons.find,   'left');
+      button(t.markerToCenter, icons.center, 'right');
+      button(t.centerOnMarker, icons.marker, 'right');
+      button(t.togglePrefs,  icons.gear,   'right');
+
+      t.revGeoCodeResultsHide.html('&times;').css('cursor', 'pointer');
+
+      prefsButton(t.storeZoomLevel, 'store zoom level');
+      prefsButton(t.storeMapCenter, 'store map center position');
+      prefsButton(t.storeMarkerCount, 'store markers count');
+      prefsButton(t.clearPreferences, 'clear storage data');
+
+      t.geoCodeInput.css({ 'float' : 'left' });
+
+      // other elements
+      spacer(t.spacerRight, 'right');
+      spacer(t.spacerLeft, 'left');
+
+      /**
+       * attach events
+       */
+      t.geoCode.on('click', function () {
+        GI.geocodeTextLocation();
+      });
+
+      t.revGeoCode.on('click', function () {
+        GI.reverseGeocodeMarkerPosition();
+      });
+
+      t.centerOnMarker.on('click', function () {
+        GI.centerToMarker();
+      });
+
+      t.markerToCenter.on('click', function () {
+        GI.markerToCenter();
+      });
+
+      t.storeZoomLevel.on('click', function () { Prefs.storeZoomLevel(GI.map.getZoom()); });
+      t.storeMapCenter.on('click', function () { Prefs.storeMapCenter(GI.map.getCenter()); });
+      // t.storeMarkerCount.on('click',function () { Prefs.storeMarkerCount() }); // todo
+      t.clearPreferences.on('click', function () { Prefs.clearPreferences(); });
+
+      // rev geocode result set actions
+      t.revGeoCodeResultsHide.on('click', function () { t.rGeoResults.hide(); });
+
+      t.togglePrefs.click(function () {
+        var clicks = $GI.data('clicks');
+        if (clicks) {
+          t.prefsPanel.slideToggle();
+        } else {
+          t.prefsPanel.slideToggle();
+        }
+        $GI.data("clicks", !clicks);
+      });
+      
+      return t;
+
+    }();
 
     /**
      * MAP INITILIZATION
      */
-    this.initialize = function () {
+    GI.initialize = function () {
       GI.mapOptions = {
         zoom : settings.zoomLevel,
         center : settings.mapCenter
@@ -445,7 +454,7 @@ SOFTWARE.
      * marker event listener - drag end */
     GI.watchMarkerMove = google.maps.event.addListener(GI.marker, 'dragend', function () {
       GI.setLatLngInputs();
-      t.hiddenInputs.empty(); // clear out the rev geocode inputs, just in case they exist
+      Layout.hiddenInputs.empty(); // clear out the rev geocode inputs, just in case they exist
     });
 
     /**
@@ -456,9 +465,9 @@ SOFTWARE.
 
       latLng = GI.marker.getPosition();
       s_latLng = latLng.lat().toFixed(settings.precision) + ',' + latLng.lng().toFixed(settings.precision);
-      t.latLngDisplay.html(s_latLng);
-      t.latInput.val(latLng.lat().toFixed(settings.precision));
-      t.lngInput.val(latLng.lng().toFixed(settings.precision));
+      Layout.latLngDisplay.html(s_latLng);
+      Layout.latInput.val(latLng.lat().toFixed(settings.precision));
+      Layout.lngInput.val(latLng.lng().toFixed(settings.precision));
     };
 
     /**
@@ -485,8 +494,8 @@ SOFTWARE.
 
       var uriEncodedLocation, center_to, search_input;
 
-      search_input = t.geoCodeInput.val();
-      uriEncodedLocation = encodeURIComponent(t.geoCodeInput.val());
+      search_input = Layout.geoCodeInput.val();
+      uriEncodedLocation = encodeURIComponent(Layout.geoCodeInput.val());
       $.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + uriEncodedLocation, function (data) {
         center_to = new google.maps.LatLng(data.results[0].geometry.location.lat, data.results[0].geometry.location.lng);
         GI.map.setCenter(center_to);
@@ -514,10 +523,10 @@ SOFTWARE.
 
         var components, i;
 
-        t.hiddenInputs.empty();
-        t.revGeoCodeResultsBody.empty();
-        t.revGeoCodeFoundCount.html(data.results.length);
-        t.rGeoResults.show();
+        Layout.hiddenInputs.empty();
+        Layout.revGeoCodeResultsBody.empty();
+        Layout.revGeoCodeFoundCount.html(data.results.length);
+        Layout.rGeoResults.show();
         if (data.results.length === 0) { return; }
 
         components = data.results[0].address_components;
@@ -550,9 +559,9 @@ SOFTWARE.
      */
     GI.parent_form = $GI.closest('form');
     GI.parent_form.on('submit', function () {
-      t.geoCodeInput.prop('disabled', true); // disable the search input so it doesn't appear in results
+      Layout.geoCodeInput.prop('disabled', true); // disable the search input so it doesn't appear in results
       setTimeout(function () { // re-enable the search_input field after serialize has executed
-        t.geoCodeInput.prop('disabled', false);
+        Layout.geoCodeInput.prop('disabled', false);
       }, 300);
       return false;
     });
@@ -564,7 +573,8 @@ SOFTWARE.
       return false;
     }
     console.log(settings.apikey)
-    this.initialize();
+    GI.initialize();
+
   };
 
 }(jQuery, google, dmgig_icons));
