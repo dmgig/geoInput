@@ -1,7 +1,7 @@
 # geoInput
 Geolocation input type for html forms. jQuery plugin. Requires on Google Maps v3 API and, for reverse geocoding, an API key.
 
-8/10/2016 - Refactoring
+8/10/16 - UI changes, Refactoring
 
 1/27/15 - New Features
 * Multiple maps
@@ -22,4 +22,4 @@ Creates hidden inputs for lat and lng at all times based on marker position. If 
 
 [code review @ codereview.stackexchange.com] (http://codereview.stackexchange.com/questions/78463/geoinput-jquery-plugin)
 
-![alt tag](/geoInput.png)
+![alt tag](/geoInput_screencap.png)
