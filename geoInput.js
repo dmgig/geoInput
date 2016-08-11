@@ -489,7 +489,9 @@ SOFTWARE.
      */
 
     /**
-     * attempts geocode a location based on user input in the geocode search field. If successful, the map is centered on the lat/lng */
+     * attempts geocode a location based on user input in the geocode search field. 
+     * If successful, the map is centered on the lat/lng 
+     */
     GI.geocodeTextLocation = function () {
 
       var uriEncodedLocation, center_to, search_input;
@@ -508,19 +510,25 @@ SOFTWARE.
      */
 
     /**
-     * reverse geocodes based on marker position, displays the results, if any, in a table below the input display */
+     * reverse geocodes based on marker position, displays the results, if any, 
+     * in a table below the input display 
+     */
     GI.reverseGeocodeMarkerPosition = function () {
 
-      var latLng, s_latLng, uriEncodedLatLng;
+      var host, params = [], url, latLng, s_latLng, uriEncodedLatLng;
 
       latLng = GI.marker.getPosition();
       s_latLng = latLng.lat().toString() + ',' + latLng.lng().toString();
       uriEncodedLatLng = encodeURIComponent(s_latLng);
 
-      console.log(settings.apikey)
+      host = 'https://maps.googleapis.com/maps/api/geocode/json';
+      params.push('latlng=' + uriEncodedLatLng);
+      params.push('location_type=ROOFTOP');
+      params.push('result_type=street_address');
+      params.push('key=' + settings.apikey);
+      url = host + '?' + params.join('&');
 
-      $.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + uriEncodedLatLng + '&location_type=ROOFTOP&result_type=street_address&key=' + settings.apikey, function (data) {
-
+      $.get(url, function (data) {
         var components, i;
 
         Layout.hiddenInputs.empty();
@@ -531,7 +539,8 @@ SOFTWARE.
 
         components = data.results[0].address_components;
         for (i in components) {
-          $(GI.revGeocodeResultsMakeRow(components[i].long_name, components[i].types)).appendTo(t.revGeoCodeResultsBody);
+          $(GI.revGeocodeResultsMakeRow(components[i].long_name, components[i].types))
+            .appendTo(Layout.revGeoCodeResultsBody);
           $(GI.revGeocodeResultsAddHiddenInputs(components[i].short_name, components[i].types));
         }
 
@@ -540,14 +549,14 @@ SOFTWARE.
 
     /**
      *  creates table row for with long_name and type */
-    this.revGeocodeResultsMakeRow = function (long_name, types) {
+    GI.revGeocodeResultsMakeRow = function (long_name, types) {
       return $('<tr><td><b>' + long_name + '</b> <i>' + types.join(', ') + '</i></td><td>&square;</td></tr>');
     };
 
     /**
      * appends hidden input to parent div, uses first type element as name, value with short name */
-    this.revGeocodeResultsAddHiddenInputs = function (short_name, types) {
-      $('<input/>', { type : "hidden", name : types[0], value : short_name }).appendTo(t.hiddenInputs);
+    GI.revGeocodeResultsAddHiddenInputs = function (short_name, types) {
+      $('<input/>', { type : "hidden", name : types[0], value : short_name }).appendTo(Layout.hiddenInputs);
     };
 
     /**
