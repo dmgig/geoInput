@@ -1,4 +1,5 @@
-# GeoInput jQuery Plugin (latitude, longitude input type with world map)
+# GeoInput jQuery Plugin
+### latitude, longitude input type with world map
 Geolocation input type for html forms. jQuery plugin. Requires on Google Maps v3 API and, for reverse geocoding, an API key.
 
 8/10/16 - UI changes, Refactoring
