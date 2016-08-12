@@ -2,8 +2,8 @@
 <html>
 
   <head>
-  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
   </head>
 
   <body>
@@ -12,14 +12,18 @@
       <input name="test_text" type="text" />
       <input type="submit" />
     </form>
+    
     <script src="jquery.geoinput.min.js"></script>
     <script type="text/javascript">
+    
       $("#geoInput1").geoInput({ apikey : "AIzaSyD8zCj-5ZGeupa0ZBL17wNBpJA6XLOL_h4" });
+    
       $("#test").submit(function(){
         alert($(this).serialize());
         event.preventDefault();
       });
+    
     </script>
-  </body>
 
+  </body>
 </html>
