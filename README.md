@@ -22,7 +22,10 @@ Creates hidden inputs for lat and lng at all times based on marker position. If 
 
 #### Change Log
 
-_8/10/16_ UI changes, Refactoring
+_8/10/16_ Refactor
+* add svg icons
+* code refactor
+* add npm, gulp
 
 _1/27/15_ New Features
 * Multiple maps
