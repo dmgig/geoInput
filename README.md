@@ -12,7 +12,7 @@ Creates hidden inputs for lat and lng at all times based on marker position. If 
 
 [code review @ codereview.stackexchange.com] (http://codereview.stackexchange.com/questions/78463/geoinput-jquery-plugin)
 
-*Input*
+*Input shown inside demo html form*
 
 ![geoinput screencap](/geoinput_screencap.png)
 
