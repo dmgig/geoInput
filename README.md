@@ -2,7 +2,7 @@
 ### latitude, longitude input type with world map
 Geolocation input type for html forms. jQuery plugin. Requires on Google Maps v3 API and, for reverse geocoding, an API key.
 
-[geoInput](http://dmgig.com/geoInput/)
+[*DEMO*](http://dmgig.com/geoInput/)
 
 A "geolocation" type input for html forms. Provides Google Map and marker. Adds hidden lat/lng fields containing marker postion.
 
